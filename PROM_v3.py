@@ -25,9 +25,9 @@ def impute_and_quantile_expression(raw_expression):
     raw_expression_copy.update(norm_expression) 
     return raw_expression_copy
     
-def binarize_expression(norm_expression,binarize_thresh):
-    path = '.\promdata\\bin_expr.pkl'
-    if os.path.isfile(path) == False:
+def binarize_expression(norm_expression,binarize_thresh,path):
+    path2 = '.\' + path + '\\bin_expr.pkl'
+    if os.path.isfile(path2) == False:
         norm_expression_copy = norm_expression.iloc[:,1:].copy()
         expression_ids = norm_expression.copy()
         quantile = 0
@@ -37,9 +37,9 @@ def binarize_expression(norm_expression,binarize_thresh):
             quantile_list.append(quantile)
             norm_expression_copy[column] = norm_expression_copy[column].map(lambda x: 1 if x >= quantile else 0 )
         expression_ids.update(norm_expression_copy)
-        expression_ids.to_pickle(path)
+        expression_ids.to_pickle(path2)
     else:
-        expression_ids = pd.read_pickle(path)
+        expression_ids = pd.read_pickle(path2)
     return expression_ids
 
 #########################
@@ -114,18 +114,19 @@ class Regulator:
                     else:
                         self.rxn_constrain_prob[rxn.id] = v.interaction_prob
     
-    def knockout(self,model,biomass_rxn):
+    def knockout(self,model,biomass_rxn,path):
         # without 'with:' so exchanges can be set outside scope; before running PROM_wrapper()
         standard_fba = model.optimize()
         obj_rxn = model.reactions.get_by_id(biomass_rxn)
-        if os.path.isfile('.\promdata\\fva.pkl') == False:
+        path2 = '.\' + path + '\\fva.pkl'
+        if os.path.isfile(path2) == False:
             #print('Analysing Flux Variability')
             fva_result = flux_variability_analysis(model,loopless=True)
             fva_result.applymap(lambda x:x if abs(x) >= 0.00001 else 0)
-            fva_result.to_pickle('.\promdata\\fva.pkl')
+            fva_result.to_pickle(path2)
         else:
             #print('Excel file with FVA results found')
-            fva_result = pd.read_pickle('.\promdata\\fva.pkl')
+            fva_result = pd.read_pickle(path2)
         with model:
             objective_variables = []
             for rxn_id,rxn_prob in self.rxn_constrain_prob.items():
@@ -231,7 +232,7 @@ class Target(Regulator):
                         k_bin_targ_on_where_reg_off += 1
             self.interaction_prob = k_bin_targ_on_where_reg_off/k_bin_reg_off
         
-def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,detail_print=False,binarize_thresh = 0.33):
+def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,detail_print=False,path,binarize_thresh = 0.33):
     model = orig_model.copy()
     regulator = Regulator(name = reg2KO)
     regulator.get_targets(regnet)
@@ -242,7 +243,7 @@ def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,detail_prin
     regulator.test_in_model(model)
     #print('raw expr:',raw_expression)
     #print('norm expr:',norm_expression)
-    bin_expression = binarize_expression(norm_expression,binarize_thresh)
+    bin_expression = binarize_expression(norm_expression,binarize_thresh,path)
     #print(quantile_list)
     #print('bin expr:',bin_expression)
     regulator.get_bin_expression(bin_expression)
@@ -267,7 +268,7 @@ def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,detail_prin
             print(' |-reactions:',[rxn.id for rxn in v.reactions])
             print(' |___________________________________')
     regulator.get_rxn_constrain_prob(target_objects)
-    prom_solution,penalty_variables,standard_fba = regulator.knockout(model,biomass_rxn)
+    prom_solution,penalty_variables,standard_fba = regulator.knockout(model,biomass_rxn,path)
     if detail_print == True:
         print('rxn_constrain_probs:',regulator.rxn_constrain_prob)
         print('penalty variables:',penalty_variables)
