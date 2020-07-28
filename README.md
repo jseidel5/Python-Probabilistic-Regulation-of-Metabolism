@@ -7,4 +7,6 @@ Chandrasekaran, S., & Price, N. D. (2010). Probabilistic integrative modeling of
 
 The directory 'original' contains different Implementations of the algorithm in Matlab.
 
-The jupyter notebook 'tutorial' explains how to use the PROM algorithm.
+The jupyter notebook 'PROM M.tuberculosis Tutorial.ipynb' explains how to use the PROM algorithm.
+
+'PROM_v3.py' contains the Python Implementation of PROM.
