@@ -5,4 +5,6 @@ This algorithm is able to integrate gene regulatory and metabolic networks by us
 This Python Implementation is based on the publication: <br>
 Chandrasekaran, S., & Price, N. D. (2010). Probabilistic integrative modeling of genome-scale metabolic and regulatory networks in Escherichia coli and Mycobacterium tuberculosis. Proceedings of the National Academy of Sciences of the United States of America, 107(41), 17845–17850. https://doi.org/10.1073/pnas.1005139107
 
+The directory 'original' contains different Implementations of the algorithm in Matlab.
 
+The jupyter notebook 'tutorial' explains how to use the PROM algorithm.
