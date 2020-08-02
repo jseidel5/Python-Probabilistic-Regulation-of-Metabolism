@@ -26,7 +26,7 @@ def impute_and_quantile_expression(raw_expression):
     return raw_expression_copy
     
 def binarize_expression(norm_expression,binarize_thresh,path):
-    path2 = '.\' + path + '\\bin_expr.pkl'
+    path2 = '.\\' + path + '\\bin_expr.pkl'
     if os.path.isfile(path2) == False:
         norm_expression_copy = norm_expression.iloc[:,1:].copy()
         expression_ids = norm_expression.copy()
@@ -118,7 +118,7 @@ class Regulator:
         # without 'with:' so exchanges can be set outside scope; before running PROM_wrapper()
         standard_fba = model.optimize()
         obj_rxn = model.reactions.get_by_id(biomass_rxn)
-        path2 = '.\' + path + '\\fva.pkl'
+        path2 = '.\\' + path + '\\fva.pkl'
         if os.path.isfile(path2) == False:
             #print('Analysing Flux Variability')
             fva_result = flux_variability_analysis(model,loopless=True)
@@ -135,15 +135,17 @@ class Regulator:
                 rxn.fva_max = fva_result.loc[rxn.id,'maximum']
                     
                 ## only constrain rxn if associated genes are constrained 
-                gpr = rxn.gene_reaction_rule
+                ## change gpr = rxn.... and regex if GPR is saved somewhere else and or genes have other name format
+                
+                #gpr = rxn._gene_reaction_rule # for iSynCJ816
+                gpr = rxn.gene_reaction_rule # for iNJ661
+                
                 for target in self.targets:
                     if target in gpr:
                         gpr = gpr.replace(target,'True')
-                gpr = re.sub(r'Rv[a-zA-Z0-9]*','False',gpr)
-                    
+                gpr = re.sub(r'Rv[a-zA-Z0-9]*','False',gpr) # for iNJ661
+                #gpr = re.sub(r'SGL_RS[a-zA-Z0-9]*','False',gpr)  # for iSynCJ816 
                 #print('here:',gpr)
-                if eval(gpr) == False:
-                    continue
                 
                 ## Penalty Variable Weights
                 ## ALPHA
