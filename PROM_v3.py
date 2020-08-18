@@ -234,7 +234,7 @@ class Target(Regulator):
                         k_bin_targ_on_where_reg_off += 1
             self.interaction_prob = k_bin_targ_on_where_reg_off/k_bin_reg_off
         
-def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,detail_print=False,path,binarize_thresh = 0.33):
+def PROM_wrapper(reg2KO,orig_model,raw_expression,regnet,biomass_rxn,path,detail_print=False,binarize_thresh = 0.33):
     model = orig_model.copy()
     regulator = Regulator(name = reg2KO)
     regulator.get_targets(regnet)
